@@ -16,7 +16,7 @@ This is the public marketing and content repository for Mail for Agents.
 - Rust 2024, Axum, Askama, and Tower HTTP.
 - Server-render the first useful response.
 - Add HTMX only for a bounded interaction with a normal form or link fallback.
-- Keep content in Git under `content/`; do not introduce a database or CMS without an explicit decision.
+- Keep content in Git under `content/`; do not introduce a database or CMS without an explicit decision. If site persistence becomes necessary, SQLite is the only approved v1 database.
 - Keep JavaScript optional and small. Do not add a SPA framework.
 
 ## Design direction
@@ -42,4 +42,3 @@ The site should feel like precise field instrumentation for lifecycle systems: e
 3. Run `cargo fmt --check`, `cargo check --all-targets`, and `cargo test`.
 4. For visual changes, inspect desktop and narrow layouts plus keyboard and reduced-motion behavior.
 5. Keep commits scoped and explain any cross-repository dependency with a shared change ID.
-
