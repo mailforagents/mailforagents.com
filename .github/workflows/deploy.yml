@@ -56,13 +56,10 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Make the public site's package pullable without credentials
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api --method PATCH /orgs/mailforagents/packages/container/mailforagents.com --field visibility=public
 
   deploy:
     needs: publish
+    if: vars.COOLIFY_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -82,7 +79,22 @@ jobs:
             --header "Content-Type: application/json" \
             --data "{\"docker_registry_image_name\":\"$REGISTRY/$IMAGE_NAME\",\"docker_registry_image_tag\":\"$IMAGE_TAG\"}" \
             "$COOLIFY_URL/api/v1/applications/$COOLIFY_RESOURCE_UUID"
-          curl --fail-with-body --silent --show-error \
+          DEPLOY_RESPONSE=$(curl --fail-with-body --silent --show-error \
             --request GET \
             --header "Authorization: Bearer $COOLIFY_TOKEN" \
-            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_RESOURCE_UUID&force=true"
+            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_RESOURCE_UUID&force=true")
+          DEPLOYMENT_UUID=$(jq --raw-output '.deployments[0].deployment_uuid' <<< "$DEPLOY_RESPONSE")
+          test -n "$DEPLOYMENT_UUID"
+          test "$DEPLOYMENT_UUID" != "null"
+          for attempt in {1..60}; do
+            STATUS=$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $COOLIFY_TOKEN" \
+              "$COOLIFY_URL/api/v1/deployments/$DEPLOYMENT_UUID" | jq --raw-output '.status')
+            case "$STATUS" in
+              finished) exit 0 ;;
+              failed|cancelled) echo "Coolify deployment $DEPLOYMENT_UUID ended with $STATUS" >&2; exit 1 ;;
+            esac
+            sleep 5
+          done
+          echo "Coolify deployment $DEPLOYMENT_UUID did not finish within five minutes" >&2
+          exit 1

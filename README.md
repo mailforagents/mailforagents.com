@@ -31,6 +31,6 @@ Pushes to `main` run `.github/workflows/deploy.yml`. The workflow verifies the R
 The GitHub `production` environment requires these settings:
 
 - secrets: `COOLIFY_URL`, `COOLIFY_TOKEN`
-- variable: `COOLIFY_RESOURCE_UUID`
+- variables: `COOLIFY_RESOURCE_UUID`, `COOLIFY_DEPLOY_ENABLED`
 
-Coolify is a runtime and deployment target only; it does not compile this project.
+Set `COOLIFY_DEPLOY_ENABLED` to `true` only after the GHCR package is public or the Coolify server is authenticated to GHCR. Coolify is a runtime and deployment target only; it does not compile this project.
