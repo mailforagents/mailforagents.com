@@ -31,6 +31,6 @@ Pushes to `main` run `.github/workflows/deploy.yml`. The workflow verifies the R
 The GitHub `production` environment requires these settings:
 
 - secrets: `COOLIFY_URL`, `COOLIFY_TOKEN`
-- variables: `COOLIFY_RESOURCE_UUID`, `COOLIFY_DEPLOY_ENABLED`
+- variable: `COOLIFY_RESOURCE_UUID`
 
-Set `COOLIFY_DEPLOY_ENABLED` to `true` only after the GHCR package is public or the Coolify server is authenticated to GHCR. Coolify is a runtime and deployment target only; it does not compile this project.
+The repository-level variable `COOLIFY_DEPLOY_ENABLED` gates the deploy job because environment variables are not available while GitHub evaluates job conditions. Set it to `true` only after the GHCR package is public or the Coolify server is authenticated to GHCR. Coolify is a runtime and deployment target only; it does not compile this project.
